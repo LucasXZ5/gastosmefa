@@ -1,6 +1,6 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Gastos de a dos</title>
+<title>Gastos Mefa</title>
 <link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Gastos">
 <style>
@@ -117,7 +117,7 @@ function applyTheme(){const r=document.documentElement.style,t=cfg.user?cfg.them
 function setTh(k,v){cfg.theme={...cfg.theme,[k]:v};localStorage.setItem('gc',JSON.stringify(cfg));applyTheme()}
 function resetTh(){cfg.theme={};localStorage.setItem('gc',JSON.stringify(cfg));applyTheme();render()}
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme);
-const loginView=()=>`<div style="padding-top:6vh;text-align:center"><img src="icon.svg" alt="" style="width:92px;height:92px;display:block;margin:0 auto 16px;border-radius:28px;box-shadow:0 12px 28px #0005"><h1 style="margin-bottom:4px">Gastos de a dos</h1><p class=mu>Ingresá con tu usuario</p></div><div class=c style="margin-top:22px">${fld('Usuario','<input id=lu autocapitalize=none autocomplete=username>')}${fld('Contraseña',`<input id=lp type=password autocomplete=current-password onkeydown="if(event.key=='Enter')login()">`)}<button class=btn onclick="login()">Ingresar</button></div>${cfg.fb?'':'<p class=mu style="text-align:center">Primero tocá ☁️ (arriba a la derecha) y pegá la configuración de Firebase.</p>'}`;
+const loginView=()=>`<div style="padding-top:6vh;text-align:center"><img src="icon.svg" alt="" style="width:92px;height:92px;display:block;margin:0 auto 16px;border-radius:28px;box-shadow:0 12px 28px #0005"><h1 style="margin-bottom:4px">Gastos Mefa</h1><p class=mu>Ingresá con tu usuario</p></div><div class=c style="margin-top:22px">${fld('Usuario','<input id=lu autocapitalize=none autocomplete=username>')}${fld('Contraseña',`<input id=lp type=password autocomplete=current-password onkeydown="if(event.key=='Enter')login()">`)}<button class=btn onclick="login()">Ingresar</button></div>${cfg.fb?'':'<p class=mu style="text-align:center">Primero tocá ☁️ (arriba a la derecha) y pegá la configuración de Firebase.</p>'}`;
 async function login(){const u=$('#lu').value.trim().toLowerCase().replace(/\s+/g,''),p=$('#lp').value;if(!u||!p)return toast('Completá usuario y contraseña');
  try{await boot();await firebase.auth().signInWithEmailAndPassword(u.includes('@')?u:u+'@gastos.app',p);cfg.user=u.split('@')[0];localStorage.setItem('gc',JSON.stringify(cfg));T='in';applyTheme();render();initSync()}
  catch(x){toast(['auth/invalid-credential','auth/user-not-found','auth/wrong-password'].includes(x.code)?'Usuario o contraseña incorrectos':x.message)}}
