@@ -9,7 +9,7 @@
 *{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
 body{font:15px/1.45 -apple-system,"Segoe UI",Inter,system-ui,sans-serif;background:var(--bg);color:var(--tx);padding-top:env(safe-area-inset-top)}
 body:before{content:"";position:fixed;top:0;left:0;right:0;height:280px;background:radial-gradient(120% 100% at 50% -20%,color-mix(in srgb,var(--h2) 25%,transparent),transparent);pointer-events:none}
-main{position:relative;max-width:560px;margin:auto;padding:20px 16px 150px}
+main{position:relative;max-width:560px;margin:auto;padding:58px 16px 150px}
 h1{font-size:24px;font-weight:800;letter-spacing:-.5px;margin-bottom:14px}h3{margin-bottom:12px;font-size:18px}
 .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.top h1{margin:0}
 .av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--h2),var(--hero));color:#fff;display:grid;place-items:center;font-weight:700;font-size:18px}
@@ -39,13 +39,18 @@ input,select,textarea{width:100%;padding:12px 14px;border:2px solid transparent;
 .tag{font-size:11px;padding:2px 9px;border-radius:10px;background:var(--vi2);color:var(--vi);font-weight:600}
 .em{text-align:center;padding:36px 10px;font-size:42px}.em p{font-size:14px;margin-top:6px;color:var(--mu)}
 #to{position:fixed;left:50%;bottom:150px;transform:translateX(-50%);background:#1f2937;color:#fff;padding:11px 18px;border-radius:22px;display:none;z-index:9;box-shadow:0 6px 20px #0005}
+#cl{position:fixed;top:calc(10px + env(safe-area-inset-top));right:14px;z-index:4;width:40px;height:40px;border-radius:13px;border:0;background:var(--card);box-shadow:var(--sh);font-size:19px;opacity:.65}#cl.ok{opacity:1;box-shadow:0 0 0 2px var(--ok)}
+.sw{width:36px;height:36px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 2px var(--bd)}
+button,.c[onclick]{transition:transform .15s,box-shadow .15s,filter .15s}button:active{transform:scale(.96)}
+@media(hover:hover){button{cursor:pointer}.btn:hover,.fab:hover{transform:translateY(-3px) scale(1.04);box-shadow:0 14px 28px #0005;filter:brightness(1.1)}
+nav button:hover,.chips button:hover,.seg button:hover,#cl:hover{transform:translateY(-3px);box-shadow:0 8px 18px #0003;opacity:1}.sw:hover{transform:scale(1.18)}.c[onclick]:hover{transform:translateY(-2px);box-shadow:0 10px 24px #0002}}
 </style></head><body>
-<main id="app"></main><button class="fab" id="fab" onclick="fab()">+</button><nav id="nav"></nav><div id="sh"></div><div id="to"></div>
+<button id="cl" onclick="cloud()" title="Conexión con Firebase">☁️</button><main id="app"></main><button class="fab" id="fab" onclick="fab()">+</button><nav id="nav"></nav><div id="sh"></div><div id="to"></div>
 <script>
 const $=s=>document.querySelector(s),uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6),today=()=>new Date().toISOString().slice(0,10),ym=()=>today().slice(0,7);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),vis=a=>a.filter(x=>!x.del),srt=a=>[...a].sort((x,y)=>x.id<y.id?-1:1);
 const rd=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}};
-let D=rd('gd',{accs:[],txs:[],svcs:[]}),cfg=rd('gc',{name:'',code:'',fb:'',partner:''});
+let D=rd('gd',{accs:[],txs:[],svcs:[]}),cfg=rd('gc',{user:'',fb:''});
 const CAT={Comida:'🛒',Hogar:'🏠',Servicios:'💡',Transporte:'🚗',Salud:'💊',Ocio:'🎉',Compras:'🛍️',Deudas:'💳',Sueldo:'💼',Otros:'📦'};
 const TYP={corriente:['🏦','Cuenta corriente'],ahorro:['🐖','Caja de ahorro'],efectivo:['💵','Efectivo'],digital:['📱','Billetera digital'],tarjeta:['💳','Tarjeta de crédito'],prestamo:['🤝','Préstamo / deuda']};
 const fm=(n,c)=>(n<0?'−':'')+(c=='USD'?'US$ '+Math.abs(n).toLocaleString('es-PY',{minimumFractionDigits:2,maximumFractionDigits:2}):'₲ '+Math.round(Math.abs(n)).toLocaleString('es-PY'));
@@ -58,27 +63,30 @@ const fld=(l,i)=>`<label>${l}</label>${i}`;
 const ser=()=>JSON.stringify({accs:srt(D.accs),txs:srt(D.txs),svcs:srt(D.svcs)});
 function merge(r){for(const k of['accs','txs','svcs']){const m=new Map(D[k].map(x=>[x.id,x]));(r[k]||[]).forEach(x=>{const l=m.get(x.id);if(!l||x.u>l.u)m.set(x.id,x)});D[k]=srt([...m.values()])}localStorage.setItem('gd',JSON.stringify(D))}
 let db,ref,usr,unsub,st='Solo en este dispositivo',t0;
-function setSt(s){st=s;if(T=='aj')render()}
+function setSt(s){st=s;const c=$('#cl');if(c)c.className=s[0]=='✓'?'ok':''}
 function save(){localStorage.setItem('gd',JSON.stringify(D));push()}
-function push(){if(!ref)return;clearTimeout(t0);t0=setTimeout(()=>db.runTransaction(async t=>{const s=await t.get(ref);if(s.exists)merge(JSON.parse(s.data().d));t.set(ref,{d:ser(),emails:[...new Set([...(s.exists?s.data().emails:[usr.email]),cfg.partner].filter(Boolean).map(x=>x.toLowerCase()))]})}).then(()=>setSt('✓ Sincronizado')).catch(()=>{setSt('Sin conexión: se reintenta solo');setTimeout(push,15000)}),400)}
+function push(){if(!ref)return;clearTimeout(t0);t0=setTimeout(()=>db.runTransaction(async t=>{const s=await t.get(ref);if(s.exists)merge(JSON.parse(s.data().d));t.set(ref,{d:ser()})}).then(()=>setSt('✓ Sincronizado')).catch(()=>{setSt('Sin conexión: se reintenta solo');setTimeout(push,15000)}),400)}
 addEventListener('online',push);
 const lsc=u=>new Promise((r,j)=>{const s=document.createElement('script');s.src=u;s.onload=r;s.onerror=j;document.head.appendChild(s)});
-async function initSync(){if(!cfg.fb||!cfg.code)return;try{setSt('Conectando…');const B='https://www.gstatic.com/firebasejs/10.12.2/firebase-';
+async function boot(){if(!cfg.fb)throw Error('Primero configurá Firebase con el ícono ☁️');const B='https://www.gstatic.com/firebasejs/10.12.2/firebase-';
  if(!window.firebase){await lsc(B+'app-compat.js');await lsc(B+'auth-compat.js');await lsc(B+'firestore-compat.js')}
- const conf=new Function('return '+cfg.fb.slice(cfg.fb.indexOf('{'),cfg.fb.lastIndexOf('}')+1))();
- if(!firebase.apps.length)firebase.initializeApp(conf);usr=await new Promise(r=>{const o=firebase.auth().onAuthStateChanged(x=>{o();r(x)})});if(!usr)return setSt('Iniciá sesión para sincronizar');
- db=firebase.firestore();ref=db.collection('hogares').doc(cfg.code);
- unsub&&unsub();unsub=ref.onSnapshot(s=>{if(s.exists){merge(JSON.parse(s.data().d));render();if(s.data().d!=ser()||(cfg.partner&&!s.data().emails.includes(cfg.partner)))push();else setSt('✓ Sincronizado')}else push()},e=>setSt('Error: '+e.message))}catch(e){setSt('Error: '+e.message)}}
+ if(!firebase.apps.length)firebase.initializeApp(new Function('return '+cfg.fb.slice(cfg.fb.indexOf('{'),cfg.fb.lastIndexOf('}')+1))());db=firebase.firestore()}
+async function initSync(){if(!cfg.fb||!cfg.user)return;try{setSt('Conectando…');await boot();
+ usr=await new Promise(r=>{const o=firebase.auth().onAuthStateChanged(x=>{o();r(x)})});if(!usr)return setSt('Sesión vencida: volvé a ingresar');
+ ref=db.collection('hogares').doc('hogar');unsub&&unsub();
+ unsub=ref.onSnapshot(s=>{if(s.exists){merge(JSON.parse(s.data().d));render();if(s.data().d!=ser())push();else setSt('✓ Sincronizado')}else push()},e=>setSt('Error: '+e.message))}catch(e){setSt('Sin conexión')}}
 function upsert(k,o){o.u=Date.now();const i=D[k].findIndex(x=>x.id==o.id);i<0?D[k].push(o):D[k][i]=o;save()}
 function del(k,id){const o=D[k].find(x=>x.id==id);if(o&&confirm('¿Eliminar?')){o.del=1;upsert(k,o);render()}}
 /* ---------- cálculos ---------- */
-const acc=id=>D.accs.find(a=>a.id==id),me=()=>cfg.name||'Yo';
+const acc=id=>D.accs.find(a=>a.id==id),me=()=>cfg.user?cfg.user[0].toUpperCase()+cfg.user.slice(1):'Yo';
 function bal(a){let b=a.open||0;vis(D.txs).forEach(t=>{if(t.acc==a.id)b+=t.type=='ingreso'?t.amount:-t.amount;if(t.to==a.id)b+=t.toAmt||t.amount});return b}
 const spend=(f,c)=>vis(D.txs).filter(t=>t.type=='gasto'&&t.date.startsWith(ym())&&acc(t.acc)?.cur==c&&f(t)).reduce((s,t)=>s+t.amount,0);
 /* ---------- vistas ---------- */
-let T=cfg.name?'in':'aj',flt='all',F={};
-const TABS=[['in','🏠','Inicio'],['mv','🧾','Movs'],['cu','👛','Cuentas'],['sv','💡','Servicios'],['aj','⚙️','Ajustes']];
-function render(){$('#app').innerHTML={in:home,mv:movs,cu:cuentas,sv:servs,aj:sets}[T]();
+let T='in',flt='all',F={};
+const TABS=[['in','🏠','Inicio'],['mv','🧾','Movs'],['cu','👛','Cuentas'],['sv','💡','Servicios'],['aj','⚙️','Opciones']];
+function render(){const lg=!cfg.user;$('#nav').style.display=lg?'none':'flex';
+ if(lg){$('#fab').style.display='none';$('#app').innerHTML=loginView();return}
+ $('#app').innerHTML={in:home,mv:movs,cu:cuentas,sv:servs,aj:sets}[T]();
  $('#nav').innerHTML=TABS.map(([k,i,l])=>`<button class="${T==k?'on':''}" onclick="T='${k}';render()"><span>${i}</span>${l}</button>`).join('');$('#fab').style.display=T=='aj'?'none':'block'}
 function fab(){({in:newTx,mv:newTx,cu:newAcc,sv:newSvc})[T]()}
 const emp=(i,t)=>`<div class=em>${i}<p>${t}</p></div>`;
@@ -97,11 +105,10 @@ function cuentas(){return `<h1>Cuentas</h1>`+(vis(D.accs).map(a=>{const b=bal(a)
 function servs(){return `<h1>Servicios</h1>`+(vis(D.svcs).sort((a,b)=>a.day-b.day).map(s=>`<div class="c row"><div class="ic ${s.scope=='shared'?'v':''}" onclick="del('svcs','${s.id}')">💡</div><div style="flex:1"><b>${esc(s.name)}</b> ${s.scope=='shared'?'<span class=tag>Compartido</span>':''}<div class=mu>Vence día ${s.day} · ${fm(s.amount,s.cur)}</div></div>${s.paid==ym()?'<b class=pos>✓ Pagado</b>':`<button class="btn s" onclick="payS('${s.id}')">Pagar</button>`}</div>`).join('')||emp('💡','Agregá ANDE, ESSAP, internet…<br>con el botón +'))}
 function payS(id){const s=D.svcs.find(x=>x.id==id);if(!acc(s.acc))return toast('La cuenta de este servicio ya no existe');
  upsert('txs',{id:uid(),date:today(),type:'gasto',amount:s.amount,acc:s.acc,cat:'Servicios',note:s.name,scope:s.scope,by:me()});s.paid=ym();upsert('svcs',s);render();toast('Pago registrado')}
-function sets(){return `<h1>Ajustes</h1><div class=c>${fld('Tu nombre',`<input value="${esc(cfg.name)}" id=cn placeholder="Ej: Fiorella">`)}</div>
- <div class=c><b>🎨 Apariencia</b>${fld('Color de botones y acentos',`<div class=row style="justify-content:flex-start;flex-wrap:wrap;gap:10px">${['#0f766e','#2563eb','#7c3aed','#db2777','#ea580c','#475569'].map(c=>`<button onclick="setTh('btn','${c}');render()" style="width:36px;height:36px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 2px var(--bd);background:${c}"></button>`).join('')}</div><input type=color value="${cfg.theme?.btn||'#0f766e'}" oninput="setTh('btn',this.value)" style="margin-top:10px">`)}${fld('Color de fondo',`<input type=color value="${cfg.theme?.bg||'#f2f7f6'}" oninput="setTh('bg',this.value)">`)}<button class="btn s" style="margin-top:14px" onclick="resetTh()">Restablecer colores</button></div>
- <div class=c><b>☁️ Sincronización (Firebase)</b><p class=mu>Los dos usan el mismo código de hogar y la misma configuración.</p>${fld('Código del hogar',`<div class=row><input id=cc value="${esc(cfg.code)}"><button class="btn s" onclick="$('#cc').value=uid()+uid()">Generar</button></div>`)}${fld('Configuración de Firebase (pegala tal cual)',`<textarea id=cf rows=5 placeholder="const firebaseConfig = { apiKey: ... }">${esc(cfg.fb)}</textarea>`)}${fld('Email de tu pareja (autorizado en el hogar)',`<input id=cp type=email value="${esc(cfg.partner)}">`)}<p class=mu style="margin-top:8px">Estado: ${esc(st)}</p></div>${authCard()}<button class=btn onclick="saveCfg()">Guardar y conectar</button>`}
+function sets(){return `<h1>Opciones</h1><div class=c><div class=row><div><b>👤 ${esc(me())}</b><div class=mu>Sesión iniciada</div></div><button class="btn s" onclick="logout()">Cerrar sesión</button></div></div>
+ <div class=c><b>🎨 Apariencia</b>${fld('Color de botones y acentos',`<div class=row style="justify-content:flex-start;flex-wrap:wrap;gap:10px">${['#0f766e','#2563eb','#7c3aed','#db2777','#ea580c','#475569'].map(c=>`<button class=sw onclick="setTh('btn','${c}');render()" style="background:${c}"></button>`).join('')}</div><input type=color value="${cfg.theme?.btn||'#0f766e'}" oninput="setTh('btn',this.value)" style="margin-top:10px">`)}${fld('Color de fondo',`<input type=color value="${cfg.theme?.bg||'#f2f7f6'}" oninput="setTh('bg',this.value)">`)}<button class="btn s" style="margin-top:14px" onclick="resetTh()">Restablecer colores</button></div>`}
 const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),mix=(a,b,t)=>'#'+hx(a).map((v,i)=>Math.round(v*(1-t)+hx(b)[i]*t).toString(16).padStart(2,'0')).join(''),lum=h=>{const[r,g,b]=hx(h);return(.299*r+.587*g+.114*b)/255};
-function applyTheme(){const r=document.documentElement.style,t=cfg.theme||{},sd=matchMedia('(prefers-color-scheme:dark)').matches;
+function applyTheme(){const r=document.documentElement.style,t=cfg.user?cfg.theme||{}:{},sd=matchMedia('(prefers-color-scheme:dark)').matches;
  ['--hero','--h2','--pr','--pr2','--bg','--card','--tx','--mu','--bd'].forEach(k=>r.removeProperty(k));
  const dk=t.bg?lum(t.bg)<.5:sd;
  if(t.bg){r.setProperty('--bg',t.bg);r.setProperty('--card',dk?mix(t.bg,'#ffffff',.08):mix(t.bg,'#ffffff',.65));r.setProperty('--tx',dk?'#e9f3f0':'#10201c');r.setProperty('--mu',dk?'#9db0aa':'#70827d');r.setProperty('--bd',mix(t.bg,dk?'#ffffff':'#000000',.1))}
@@ -110,10 +117,13 @@ function applyTheme(){const r=document.documentElement.style,t=cfg.theme||{},sd=
 function setTh(k,v){cfg.theme={...cfg.theme,[k]:v};localStorage.setItem('gc',JSON.stringify(cfg));applyTheme()}
 function resetTh(){cfg.theme={};localStorage.setItem('gc',JSON.stringify(cfg));applyTheme();render()}
 matchMedia('(prefers-color-scheme:dark)').addEventListener('change',applyTheme);
-const authCard=()=>usr?`<div class=c><b>🔐 Sesión iniciada</b><p class=mu>${esc(usr.email)}</p><button class="btn s" onclick="logout()">Cerrar sesión</button></div>`:`<div class=c><b>🔐 Iniciar sesión</b>${fld('Email','<input id=le type=email autocomplete=email>')}${fld('Contraseña (mínimo 6)','<input id=lp type=password autocomplete=current-password>')}<div class=row style="margin-top:12px"><button class="btn s" style="flex:1;padding:11px" onclick="auth(0)">Ingresar</button><button class="btn s" style="flex:1;padding:11px" onclick="auth(1)">Crear cuenta</button></div></div>`;
-async function auth(n){if(!window.firebase||!firebase.apps.length)return toast('Primero guardá la configuración de Firebase');const e=$('#le').value.trim(),p=$('#lp').value;try{const a=firebase.auth();n?await a.createUserWithEmailAndPassword(e,p):await a.signInWithEmailAndPassword(e,p);initSync()}catch(x){toast(x.code=='auth/invalid-credential'?'Email o contraseña incorrectos':x.code=='auth/email-already-in-use'?'Ese email ya tiene cuenta':x.message)}}
-async function logout(){await firebase.auth().signOut();unsub&&unsub();usr=ref=null;setSt('Sesión cerrada')}
-function saveCfg(){cfg={...cfg,name:$('#cn').value.trim(),code:$('#cc').value.trim(),fb:$('#cf').value.trim(),partner:$('#cp').value.trim().toLowerCase()};localStorage.setItem('gc',JSON.stringify(cfg));T='in';render();toast('Guardado');initSync()}
+const loginView=()=>`<div style="padding-top:6vh;text-align:center"><div class=av style="width:76px;height:76px;font-size:36px;margin:0 auto 14px;border-radius:24px">₲</div><h1 style="margin-bottom:4px">Gastos de a dos</h1><p class=mu>Ingresá con tu usuario</p></div><div class=c style="margin-top:22px">${fld('Usuario','<input id=lu autocapitalize=none autocomplete=username>')}${fld('Contraseña',`<input id=lp type=password autocomplete=current-password onkeydown="if(event.key=='Enter')login()">`)}<button class=btn onclick="login()">Ingresar</button></div>${cfg.fb?'':'<p class=mu style="text-align:center">Primero tocá ☁️ (arriba a la derecha) y pegá la configuración de Firebase.</p>'}`;
+async function login(){const u=$('#lu').value.trim().toLowerCase().replace(/\s+/g,''),p=$('#lp').value;if(!u||!p)return toast('Completá usuario y contraseña');
+ try{await boot();await firebase.auth().signInWithEmailAndPassword(u.includes('@')?u:u+'@gastos.app',p);cfg.user=u.split('@')[0];localStorage.setItem('gc',JSON.stringify(cfg));T='in';applyTheme();render();initSync()}
+ catch(x){toast(['auth/invalid-credential','auth/user-not-found','auth/wrong-password'].includes(x.code)?'Usuario o contraseña incorrectos':x.message)}}
+async function logout(){if(!confirm('¿Cerrar sesión?'))return;try{await firebase.auth().signOut()}catch(e){}unsub&&unsub();usr=ref=null;cfg.user='';localStorage.setItem('gc',JSON.stringify(cfg));applyTheme();render()}
+function cloud(){sheet(`<h3>☁️ Conexión con Firebase</h3><p class=mu>Pegá la configuración de tu proyecto (la misma en todos los dispositivos).</p>${fld('Configuración',`<textarea id=cf rows=7 placeholder="const firebaseConfig = {...}">${esc(cfg.fb)}</textarea>`)}<p class=mu style="margin-top:8px">Estado: ${esc(st)}</p><button class=btn onclick="saveFb()">Guardar y conectar</button>`)}
+function saveFb(){cfg.fb=$('#cf').value.trim();localStorage.setItem('gc',JSON.stringify(cfg));toast('Guardado');setTimeout(()=>location.reload(),500)}
 /* ---------- formularios ---------- */
 const accOpts=s=>vis(D.accs).map(a=>`<option value="${a.id}" ${a.id==s?'selected':''}>${esc(a.name)} (${a.cur})</option>`).join('');
 const sel=(k,o,v)=>`<select onchange="F.${k}=this.value;frm()">${o}</select>`;
