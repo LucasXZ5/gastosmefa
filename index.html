@@ -1,7 +1,7 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Gastos de a dos</title>
-<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icon.svg"><meta name="theme-color" content="#0f766e">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="theme-color" content="#0f766e">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Gastos">
 <style>
 :root{--bg:#f2f7f6;--card:#fff;--tx:#10201c;--mu:#70827d;--pr:#0d9488;--hero:#0f766e;--h2:#14b8a6;--pr2:#d9f6f1;--vi:#7c3aed;--vi2:#ede9fe;--bad:#e11d48;--ok:#059669;--bd:#e5eeec;--sh:0 4px 18px #0000001a}
@@ -158,6 +158,5 @@ function svcf(){sheet(`<h3>Nuevo servicio</h3>${fld('Nombre',`<input value="${es
  <button class=btn onclick="saveSvc()">Guardar</button>`)}
 function saveSvc(){if(!F.name||!num(F.amount))return toast('Completá nombre y monto');upsert('svcs',{id:uid(),name:F.name,amount:num(F.amount),cur:F.cur,day:F.day||1,acc:F.acc,scope:F.scope});closeS();render()}
 if('serviceWorker'in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-(()=>{const i=new Image();i.onload=()=>{try{const c=document.createElement('canvas');c.width=c.height=180;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,180,180);x.drawImage(i,-13,-13,206,206);document.querySelector('link[rel=apple-touch-icon]').href=c.toDataURL('image/png')}catch(e){}};i.src='icon.svg?v='+Date.now()})();
 applyTheme();render();initSync();
 </script></body></html>
