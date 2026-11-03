@@ -84,7 +84,7 @@ const spend=(f,c)=>vis(D.txs).filter(t=>t.type=='gasto'&&t.date.startsWith(ym())
 /* ---------- vistas ---------- */
 let T='in',flt='all',F={};
 const TABS=[['in','🏠','Inicio'],['mv','🧾','Movs'],['cu','👛','Cuentas'],['sv','💡','Servicios'],['aj','⚙️','Opciones']];
-function render(){const lg=!cfg.user;$('#nav').style.display=lg?'none':'flex';
+function render(){const lg=!cfg.user;$('#nav').style.display=lg?'none':'flex';$('#cl').style.display=lg?'block':'none';$('#app').style.paddingTop=lg?'':'22px';
  if(lg){$('#fab').style.display='none';$('#app').innerHTML=loginView();return}
  $('#app').innerHTML={in:home,mv:movs,cu:cuentas,sv:servs,aj:sets}[T]();
  $('#nav').innerHTML=TABS.map(([k,i,l])=>`<button class="${T==k?'on':''}" onclick="T='${k}';render()"><span>${i}</span>${l}</button>`).join('');$('#fab').style.display=T=='aj'?'none':'block'}
@@ -106,7 +106,8 @@ function servs(){return `<h1>Servicios</h1>`+(vis(D.svcs).sort((a,b)=>a.day-b.da
 function payS(id){const s=D.svcs.find(x=>x.id==id);if(!acc(s.acc))return toast('La cuenta de este servicio ya no existe');
  upsert('txs',{id:uid(),date:today(),type:'gasto',amount:s.amount,acc:s.acc,cat:'Servicios',note:s.name,scope:s.scope,by:me()});s.paid=ym();upsert('svcs',s);render();toast('Pago registrado')}
 function sets(){return `<h1>Opciones</h1><div class=c><div class=row><div><b>👤 ${esc(me())}</b><div class=mu>Sesión iniciada</div></div><button class="btn s" onclick="logout()">Cerrar sesión</button></div></div>
- <div class=c><b>🎨 Apariencia</b>${fld('Color de botones y acentos',`<div class=row style="justify-content:flex-start;flex-wrap:wrap;gap:10px">${['#0f766e','#2563eb','#7c3aed','#db2777','#ea580c','#475569'].map(c=>`<button class=sw onclick="setTh('btn','${c}');render()" style="background:${c}"></button>`).join('')}</div><input type=color value="${cfg.theme?.btn||'#0f766e'}" oninput="setTh('btn',this.value)" style="margin-top:10px">`)}${fld('Color de fondo',`<input type=color value="${cfg.theme?.bg||'#f2f7f6'}" oninput="setTh('bg',this.value)">`)}<button class="btn s" style="margin-top:14px" onclick="resetTh()">Restablecer colores</button></div>`}
+ <div class=c><b>🎨 Apariencia</b>${fld('Color de botones y acentos',`<div class=row style="justify-content:flex-start;flex-wrap:wrap;gap:10px">${['#0f766e','#2563eb','#7c3aed','#db2777','#ea580c','#475569'].map(c=>`<button class=sw onclick="setTh('btn','${c}');render()" style="background:${c}"></button>`).join('')}</div><input type=color value="${cfg.theme?.btn||'#0f766e'}" oninput="setTh('btn',this.value)" style="margin-top:10px">`)}${fld('Color de fondo',`<input type=color value="${cfg.theme?.bg||'#f2f7f6'}" oninput="setTh('bg',this.value)">`)}<button class="btn s" style="margin-top:14px" onclick="resetTh()">Restablecer colores</button></div>
+ <div class=c><b>☁️ Sincronización</b><p class=mu>Estado: ${esc(st)}</p>${fld('Configuración de Firebase',`<textarea id=cf rows=6 placeholder="const firebaseConfig = {...}">${esc(cfg.fb)}</textarea>`)}<button class="btn s" style="margin-top:12px" onclick="saveFb()">Guardar y reconectar</button></div>`}
 const hx=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16)),mix=(a,b,t)=>'#'+hx(a).map((v,i)=>Math.round(v*(1-t)+hx(b)[i]*t).toString(16).padStart(2,'0')).join(''),lum=h=>{const[r,g,b]=hx(h);return(.299*r+.587*g+.114*b)/255};
 function applyTheme(){const r=document.documentElement.style,t=cfg.user?cfg.theme||{}:{},sd=matchMedia('(prefers-color-scheme:dark)').matches;
  ['--hero','--h2','--pr','--pr2','--bg','--card','--tx','--mu','--bd'].forEach(k=>r.removeProperty(k));
