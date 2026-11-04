@@ -68,9 +68,12 @@ function save(){localStorage.setItem('gd',JSON.stringify(D));push()}
 function push(){if(!ref)return;clearTimeout(t0);t0=setTimeout(()=>db.runTransaction(async t=>{const s=await t.get(ref);if(s.exists)merge(JSON.parse(s.data().d));t.set(ref,{d:ser()})}).then(()=>setSt('✓ Sincronizado')).catch(()=>{setSt('Sin conexión: se reintenta solo');setTimeout(push,15000)}),400)}
 addEventListener('online',push);
 const lsc=u=>new Promise((r,j)=>{const s=document.createElement('script');s.src=u;s.onload=r;s.onerror=j;document.head.appendChild(s)});
+function parseFb(t){const o={},K=['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId','measurementId'];
+ for(const m of t.matchAll(/["']?(\w+)["']?\s*:\s*["']([^"']*)["']/g))if(K.includes(m[1]))o[m[1]]=m[2];
+ if(!o.apiKey||!o.projectId)throw Error('La configuración está incompleta: faltan apiKey o projectId');return o}
 async function boot(){if(!cfg.fb)throw Error('Primero configurá Firebase con el ícono ☁️');const B='https://www.gstatic.com/firebasejs/10.12.2/firebase-';
  if(!window.firebase){await lsc(B+'app-compat.js');await lsc(B+'auth-compat.js');await lsc(B+'firestore-compat.js')}
- if(!firebase.apps.length)firebase.initializeApp(new Function('return '+cfg.fb.slice(cfg.fb.indexOf('{'),cfg.fb.lastIndexOf('}')+1))());db=firebase.firestore()}
+ if(!firebase.apps.length)firebase.initializeApp(parseFb(cfg.fb));db=firebase.firestore()}
 async function initSync(){if(!cfg.fb||!cfg.user)return;try{setSt('Conectando…');await boot();
  usr=await new Promise(r=>{const o=firebase.auth().onAuthStateChanged(x=>{o();r(x)})});if(!usr)return setSt('Sesión vencida: volvé a ingresar');
  ref=db.collection('hogares').doc('hogar');unsub&&unsub();
